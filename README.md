@@ -1,6 +1,6 @@
 Turmoil
 =======
-Turmoil is a tool for testing the recovery ability of applications running on [Marathon](https://mesosphere.github.io/marathon/).
+Turmoil is a [Chaos Monkey](https://github.com/Netflix/SimianArmy/wiki/Chaos-Monkey)-like tool for testing the recovery ability of applications running on [Marathon](https://mesosphere.github.io/marathon/).
 
 Turmoil can currently perform three functions:  
   1. Kill a single task  
