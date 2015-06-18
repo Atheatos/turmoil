@@ -3,9 +3,9 @@ Turmoil
 Turmoil is a tool for testing the recovery ability of applications running on [Marathon](https://mesosphere.github.io/marathon/).
 
 Turmoil can currently perform three functions:  
-1. Kill a single task  
-2. Kill a single application  
-3. Kill a given fraction of currently running tasks  
+  1. Kill a single task  
+  2. Kill a single application  
+  3. Kill a given fraction of currently running tasks  
 
 Targets are selected pseudo-randomly and are killed via calls to Marathon's REST API.
 * * *
