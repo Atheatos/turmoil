@@ -17,10 +17,9 @@ For example: every two hours, there is a 75% chance that half of all running tas
 fraction = 0.5
 fractionFrequency = 2
 fractionProbability = 0.75
-```
-_Note: a frequency of zero is not currently supported_  
+```  
   
-  
+ 
 Run Turmoil with the configuration file:
 ```
 ./turmoil -config=params.ini

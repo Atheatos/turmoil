@@ -30,10 +30,8 @@ import (
 	marathon "github.com/gambol99/go-marathon"
 	"github.com/golang/glog"
 	"github.com/vharitonsky/iniflags"
-	"math/rand"
 	"os"
 	"strings"
-	"time"
 )
 
 var (
@@ -63,45 +61,24 @@ func main() {
 	Assert(err)
 
 	// Log
-	glog.Info(fmt.Sprintf("Single task: %.2f probability every %.2f", *taskProbability, *taskFrequency))
-	glog.Info(fmt.Sprintf("Single application: %.2f probability every %.2f", *appProbability, *appFrequency))
-	glog.Info(fmt.Sprintf("All tasks * %.2f: %.2f probability every %.2f", *killFraction, *fractionProbability, *fractionFrequency))
+	glog.Info(fmt.Sprintf("Single task: %.2f probability every %.2f hour(s)", *taskProbability, *taskFrequency))
+	glog.Info(fmt.Sprintf("Single application: %.2f probability every %.2f hour(s)", *appProbability, *appFrequency))
+	glog.Info(fmt.Sprintf("All tasks * %.2f: %.2f probability every %.2f hour(s)", *killFraction, *fractionProbability, *fractionFrequency))
 
 	// Timing
-	taskTicker := time.NewTicker(time.Duration(*taskFrequency*3600.0) * time.Second)
-	appTicker := time.NewTicker(time.Duration(*appFrequency*3600.0) * time.Second)
-	fractionTicker := time.NewTicker(time.Duration(*fractionFrequency*3600.0) * time.Second)
-
-	for {
-		select {
-			case <- taskTicker.C:
-				rand.Seed(time.Now().UnixNano())
-				glog.Info("Attempting to kill a random task")
-				if (rand.Float64()<=*taskProbability) {
-					KillRandomTask(client, blacklist)
-					glog.Info("Killed a random task")
-				} else {
-					glog.Info("Did not kill a random task")
-				}
-			case <- appTicker.C:
-				rand.Seed(time.Now().UnixNano())
-				glog.Info("Attempting to kill a random application")
-				if (rand.Float64()<=*appProbability) {
-					KillRandomApp(client, blacklist)
-					glog.Info("Killed a random application")
-				} else {
-					glog.Info("Did not kill a random application")
-				}
-			case <- fractionTicker.C:
-				rand.Seed(time.Now().UnixNano())
-				glog.Info("Attempting to kill a fraction of running tasks")
-				if (rand.Float64()<=*fractionProbability) {
-					KillTaskFraction(client, blacklist, *killFraction)
-					glog.Info("Killed a fraction of running tasks")
-				} else {
-					glog.Info("Did not kill a fraction of running tasks")
-				}
-		}
+	taskQuit := make(chan int)
+	appQuit := make(chan int)
+	fractionQuit := make(chan int)
+	if (*taskFrequency*3600.0 >= 1) {
+		go taskTimer(client, blacklist, taskQuit)
 	}
-
+	if (*appFrequency*3600.0 >= 1) {
+		go appTimer(client, blacklist, appQuit)
+	}
+	if (*fractionFrequency*3600.0 >= 1) {
+		go fractionTimer(client, blacklist, fractionQuit)
+	}
+	<-taskQuit
+	<-appQuit
+	<-fractionQuit
 }

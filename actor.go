@@ -33,11 +33,11 @@ import (
 )
 
 /*  Kills a fraction of existing tasks
- * 		client: 	Marathon client interface
- * 		blacklist: 	do not kill tasks from these applications
- * 		fraction: 	fraction of the total tasks to be killed
+ *  	client: 	Marathon client interface
+ *  	blacklist: 	do not kill tasks from these applications
+ *  	fraction: 	fraction of the total tasks to be killed
  */
-func KillTaskFraction(client marathon.Marathon, blacklist []string, fraction float64) {
+func KillTaskFraction(client marathon.Marathon, blacklist []string, fraction float64) []string {
 	// Get tasks from marathon
 	tasks, err := client.AllTasks()
 	Assert(err)
@@ -55,13 +55,14 @@ func KillTaskFraction(client marathon.Marathon, blacklist []string, fraction flo
 	}
 	// Execute
 	Assert(client.KillTasks(targets, true))
+	return targets
 }
 
 /*  Kills one random application
  * 		client: 	Marathon client interface
  * 		blacklist: 	do not kill these applications
  */
-func KillRandomApp(client marathon.Marathon, blacklist []string) {
+func KillRandomApp(client marathon.Marathon, blacklist []string) string {
 	// Get applications from marathon
 	applications, err := client.ListApplications()
 	Assert(err)
@@ -73,13 +74,14 @@ func KillRandomApp(client marathon.Marathon, blacklist []string) {
 	// Execute
 	_, delerr := client.KillApplicationTasks(app, "", false)
 	Assert(delerr)
+	return app
 }
 
 /*  Kill one random task
  *  	client: 	Marathon client interface
  *  	blacklist:  do not kill tasks from these applications
  */
-func KillRandomTask(client marathon.Marathon, blacklist []string) {
+func KillRandomTask(client marathon.Marathon, blacklist []string) string {
 	// Get all of the running tasks from marathon
 	tasks, err := client.AllTasks()
 	Assert(err)
@@ -93,6 +95,7 @@ func KillRandomTask(client marathon.Marathon, blacklist []string) {
 	// Tell Marathon to delete chosen task
 	_, delerr := client.KillTask(app, task, false)
 	Assert(delerr)
+	return task
 }
 
 /*  Remove blacklisted applications or tasks from blacklisted applications from a list of potential targets 
