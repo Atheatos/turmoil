@@ -38,18 +38,18 @@ import (
 
 var (
 	// Client config
-   blacklistString = flag.String("blacklist", "turmoil", "Application names to remove from target lists (separate by comma)")
-   marathonURL = flag.String("hostURL", "http://127.0.0.1:8080", "the url for the marathon endpoint")
-   // Kill one task
-   taskFrequency = flag.Float64("taskFrequency", 0.1, "Number of hours between attempts to kill a single random task")
-   taskProbability = flag.Float64("taskProbability", 0.5, "Probability that a single task kill attempt succeeds")
-   // Kill one application
-   appFrequency = flag.Float64("appFrequency", 0.5, "Number of hours between attempts to kill a single random application")
-   appProbability = flag.Float64("appProbability", 0.2, "Probability that a single task kill attempt succeeds")
-   // Kill a fraction of tasks
-   killFraction = flag.Float64("fraction", 0.25, " of tasks to be killed (e.g. 0.25 kills 25 percent of all tasks)")
-   fractionFrequency = flag.Float64("fractionFrequency", 0.5, "Number of hours between attempts to kill a fraction of tasks at random")
-   fractionProbability = flag.Float64("fractionProbability", 0.2, "Probability that a single task kill attempt succeeds")
+	blacklistString = flag.String("blacklist", "turmoil", "Application names to remove from target lists (separate by comma)")
+	marathonURL = flag.String("hostURL", "http://127.0.0.1:8080", "the url for the marathon endpoint")
+	// Kill one task
+	taskFrequency = flag.Float64("taskFrequency", 0.1, "Number of hours between attempts to kill a single random task")
+	taskProbability = flag.Float64("taskProbability", 0.5, "Probability that a single task kill attempt succeeds")
+	// Kill one application
+	appFrequency = flag.Float64("appFrequency", 0.5, "Number of hours between attempts to kill a single random application")
+	appProbability = flag.Float64("appProbability", 0.2, "Probability that a single task kill attempt succeeds")
+	// Kill a fraction of tasks
+	killFraction = flag.Float64("fraction", 0.25, " of tasks to be killed (e.g. 0.25 kills 25 percent of all tasks)")
+	fractionFrequency = flag.Float64("fractionFrequency", 0.5, "Number of hours between attempts to kill a fraction of tasks at random")
+	fractionProbability = flag.Float64("fractionProbability", 0.2, "Probability that a single task kill attempt succeeds")
 )
 
 func main() {
@@ -69,8 +69,8 @@ func main() {
 
 	// Timing
 	taskTicker := time.NewTicker(time.Duration(*taskFrequency*3600.0) * time.Second)
-  appTicker := time.NewTicker(time.Duration(*appFrequency*3600.0) * time.Second)
-  fractionTicker := time.NewTicker(time.Duration(*fractionFrequency*3600.0) * time.Second)
+	appTicker := time.NewTicker(time.Duration(*appFrequency*3600.0) * time.Second)
+	fractionTicker := time.NewTicker(time.Duration(*fractionFrequency*3600.0) * time.Second)
 
 	for {
 		select {
@@ -90,8 +90,8 @@ func main() {
 					KillRandomApp(client, blacklist)
 					glog.Info("Killed a random application")
 				} else {
-          glog.Info("Did not kill a random application")
-        }
+					glog.Info("Did not kill a random application")
+				}
 			case <- fractionTicker.C:
 				rand.Seed(time.Now().UnixNano())
 				glog.Info("Attempting to kill a fraction of running tasks")
@@ -99,8 +99,8 @@ func main() {
 					KillTaskFraction(client, blacklist, *killFraction)
 					glog.Info("Killed a fraction of running tasks")
 				} else {
-          glog.Info("Did not kill a fraction of running tasks")
-        }
+					glog.Info("Did not kill a fraction of running tasks")
+				}
 		}
 	}
 

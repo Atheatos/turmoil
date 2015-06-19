@@ -33,28 +33,28 @@ import (
 )
 
 /*  Kills a fraction of existing tasks
- * 	client: 		Marathon client interface
+ * 	client: 	Marathon client interface
  * 	blacklist: 	do not kill tasks from these applications
  * 	fraction: 	fraction of the total tasks to be killed
  */
 func KillTaskFraction(client marathon.Marathon, blacklist []string, fraction float64) {
-   // Get tasks from marathon
-   tasks, err := client.AllTasks()
-   Assert(err)
-   // Prevent suicide
+	// Get tasks from marathon
+	tasks, err := client.AllTasks()
+	Assert(err)
+	// Prevent suicide
 	tasklist := ExtractTaskIDs(tasks.Tasks)
-   tasklist = EnforceBlacklist(tasklist, blacklist)
-   // Random permutate the array and kill the first `numTargets` tasks
-   rand.Seed(time.Now().UnixNano())
-   numTasks := float64(len(tasklist))
-   numTargets := int(numTasks*fraction)
-   indices := rand.Perm(int(numTasks))[0:numTargets]
-   targets := make([]string, numTargets)
-   for i, randi := range(indices) {
-      targets[i] = tasklist[randi]
-   }
-   // Execute
-   Assert(client.KillTasks(targets, true))
+	tasklist = EnforceBlacklist(tasklist, blacklist)
+	// Random permutate the array and kill the first `numTargets` tasks
+	rand.Seed(time.Now().UnixNano())
+	numTasks := float64(len(tasklist))
+	numTargets := int(numTasks*fraction)
+	indices := rand.Perm(int(numTasks))[0:numTargets]
+	targets := make([]string, numTargets)
+	for i, randi := range(indices) {
+		targets[i] = tasklist[randi]
+	}
+	// Execute
+	Assert(client.KillTasks(targets, true))
 }
 
 /*  Kills one random application
@@ -62,37 +62,37 @@ func KillTaskFraction(client marathon.Marathon, blacklist []string, fraction flo
  * 	blacklist: 	do not kill these applications
  */
 func KillRandomApp(client marathon.Marathon, blacklist []string) {
-   // Get applications from marathon
-   applications, err := client.ListApplications()
-   Assert(err)
-   // Prevent suicide
-   applist := EnforceBlacklist(applications, blacklist)
-   // Kill random
-   rand.Seed(time.Now().UnixNano())
-   app := applist[rand.Intn(len(applist))]
-   // Execute
-   _, delerr := client.KillApplicationTasks(app, "", false)
-   Assert(delerr)
+	// Get applications from marathon
+	applications, err := client.ListApplications()
+	Assert(err)
+	// Prevent suicide
+	applist := EnforceBlacklist(applications, blacklist)
+	// Kill random
+	rand.Seed(time.Now().UnixNano())
+	app := applist[rand.Intn(len(applist))]
+	// Execute
+	_, delerr := client.KillApplicationTasks(app, "", false)
+	Assert(delerr)
 }
 
 /*  Kill one random task
- * 	client: 	Marathon client interface
- *    blacklist:  do not kill tasks from these applications
+ *  	client: 	Marathon client interface
+ *  	blacklist:  do not kill tasks from these applications
  */
 func KillRandomTask(client marathon.Marathon, blacklist []string) {
-   // Get all of the running tasks from marathon
-   tasks, err := client.AllTasks()
-   Assert(err)
-   // Remove turmoil from the list of targets
+	// Get all of the running tasks from marathon
+	tasks, err := client.AllTasks()
+	Assert(err)
+	// Remove turmoil from the list of targets
 	tasklist := ExtractTaskIDs(tasks.Tasks)
-   tasklist = EnforceBlacklist(tasklist, blacklist)
-   // Choose a random task
-   rand.Seed(time.Now().UnixNano())
-   task := tasklist[rand.Intn(len(tasklist))]
-   app := task[0:strings.LastIndex(task, ".")] // extract the app name from the task ID
-   // Tell Marathon to delete chosen task
+	tasklist = EnforceBlacklist(tasklist, blacklist)
+	// Choose a random task
+	rand.Seed(time.Now().UnixNano())
+	task := tasklist[rand.Intn(len(tasklist))]
+	app := task[0:strings.LastIndex(task, ".")] // extract the app name from the task ID
+	// Tell Marathon to delete chosen task
 	_, delerr := client.KillTask(app, task, false)
-   Assert(delerr)
+	Assert(delerr)
 }
 
 /*  Remove blacklisted applications or tasks from blacklisted applications from a list of potential targets 
@@ -126,7 +126,7 @@ func ExtractTaskIDs (tasks []marathon.Task) []string {
 
 // Assert an error, if any
 func Assert(err error) {
-   if err != nil {
-      glog.Fatalf("Failed, error: %s", err)
-   }
+	if err != nil {
+		glog.Fatalf("Failed, error: %s", err)
+	}
 }
