@@ -33,9 +33,9 @@ import (
 )
 
 /*  Kills a fraction of existing tasks
- * 	client: 	Marathon client interface
- * 	blacklist: 	do not kill tasks from these applications
- * 	fraction: 	fraction of the total tasks to be killed
+ * 		client: 	Marathon client interface
+ * 		blacklist: 	do not kill tasks from these applications
+ * 		fraction: 	fraction of the total tasks to be killed
  */
 func KillTaskFraction(client marathon.Marathon, blacklist []string, fraction float64) {
 	// Get tasks from marathon
@@ -58,8 +58,8 @@ func KillTaskFraction(client marathon.Marathon, blacklist []string, fraction flo
 }
 
 /*  Kills one random application
- * 	client: 	Marathon client interface
- * 	blacklist: 	do not kill these applications
+ * 		client: 	Marathon client interface
+ * 		blacklist: 	do not kill these applications
  */
 func KillRandomApp(client marathon.Marathon, blacklist []string) {
 	// Get applications from marathon
@@ -97,7 +97,7 @@ func KillRandomTask(client marathon.Marathon, blacklist []string) {
 
 /*  Remove blacklisted applications or tasks from blacklisted applications from a list of potential targets 
  *  	targets: 	array of application or task ids for potential targets
- * 	blacklist: 	array of applications to not kill
+ *  	blacklist: 	array of applications to not kill
  */
 func EnforceBlacklist(targets, blacklist []string) []string {
 	for i, target := range(targets) {
