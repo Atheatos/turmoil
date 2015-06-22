@@ -38,6 +38,8 @@ var (
 	// Client config
 	blacklistString = flag.String("blacklist", "turmoil", "Application names to remove from target lists (separate by comma)")
 	marathonURL = flag.String("hostURL", "http://127.0.0.1:8080", "the url for the marathon endpoint")
+	runStart = flag.Int("start", 1000, "The start time for Turmoil")
+	runStop = flag.Int("stop", 1600, "The stop time for Turmoil")
 	// Kill one task
 	taskFrequency = flag.Float64("taskFrequency", 0.1, "Number of hours between attempts to kill a single random task")
 	taskProbability = flag.Float64("taskProbability", 0.5, "Probability that a single task kill attempt succeeds")
@@ -69,16 +71,28 @@ func main() {
 	taskQuit := make(chan int)
 	appQuit := make(chan int)
 	fractionQuit := make(chan int)
-	if (*taskFrequency*3600.0 >= 1) {
-		go taskTimer(client, blacklist, taskQuit)
-	}
-	if (*appFrequency*3600.0 >= 1) {
-		go appTimer(client, blacklist, appQuit)
-	}
-	if (*fractionFrequency*3600.0 >= 1) {
-		go fractionTimer(client, blacklist, fractionQuit)
+	for {
+		startTimers(client, blacklist, taskQuit, appQuit, fractionQuit)
 	}
 	<-taskQuit
 	<-appQuit
 	<-fractionQuit
+}
+
+func startTimers(client marathon.Marathon, blacklist []string, task, app, frac chan int) {
+	if (*taskFrequency*3600.0 >= 1) {
+		go taskTimer(client, blacklist, task)
+	}
+	if (*appFrequency*3600.0 >= 1) {
+		go appTimer(client, blacklist, app)
+	}
+	if (*fractionFrequency*3600.0 >= 1) {
+		go fractionTimer(client, blacklist, frac)
+	}
+}
+
+func stopTimers(task, app, frac chan int) {
+	task <- 1
+	app  <- 1
+	frac <- 1
 }
