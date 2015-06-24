@@ -25,25 +25,23 @@ SOFTWARE.
 package main
 
 import (
-	"github.com/golang/glog"
 	marathon "github.com/gambol99/go-marathon"
+	"github.com/golang/glog"
 	"math/rand"
 	"strings"
 	"time"
 )
 
 /*  Kills a fraction of existing tasks
- *  	client: 	Marathon client interface
- *  	blacklist: 	do not kill tasks from these applications
  *  	fraction: 	fraction of the total tasks to be killed
  */
-func KillTaskFraction(client marathon.Marathon, blacklist []string, fraction float64) []string {
+func KillTaskFraction(fraction float64) []string {
 	// Get tasks from marathon
 	tasks, err := client.AllTasks()
 	Assert(err)
 	// Prevent suicide
 	tasklist := ExtractTaskIDs(tasks.Tasks)
-	tasklist = EnforceBlacklist(tasklist, blacklist)
+	tasklist = EnforceBlacklist(tasklist)
 	// Random permutate the array and kill the first `numTargets` tasks
 	rand.Seed(time.Now().UnixNano())
 	numTasks := float64(len(tasklist))
@@ -54,20 +52,17 @@ func KillTaskFraction(client marathon.Marathon, blacklist []string, fraction flo
 		targets[i] = tasklist[randi]
 	}
 	// Execute
-	Assert(client.KillTasks(targets, true))
+	Assert(client.KillTasks(targets, false))
 	return targets
 }
 
-/*  Kills one random application
- * 		client: 	Marathon client interface
- * 		blacklist: 	do not kill these applications
- */
-func KillRandomApp(client marathon.Marathon, blacklist []string) string {
+/*  Kills one random application */
+func KillRandomApp() string {
 	// Get applications from marathon
 	applications, err := client.ListApplications()
 	Assert(err)
 	// Prevent suicide
-	applist := EnforceBlacklist(applications, blacklist)
+	applist := EnforceBlacklist(applications)
 	// Kill random
 	rand.Seed(time.Now().UnixNano())
 	app := applist[rand.Intn(len(applist))]
@@ -77,17 +72,14 @@ func KillRandomApp(client marathon.Marathon, blacklist []string) string {
 	return app
 }
 
-/*  Kill one random task
- *  	client: 	Marathon client interface
- *  	blacklist:  do not kill tasks from these applications
- */
-func KillRandomTask(client marathon.Marathon, blacklist []string) string {
+/*  Kill one random task */
+func KillRandomTask() string {
 	// Get all of the running tasks from marathon
 	tasks, err := client.AllTasks()
 	Assert(err)
 	// Remove turmoil from the list of targets
 	tasklist := ExtractTaskIDs(tasks.Tasks)
-	tasklist = EnforceBlacklist(tasklist, blacklist)
+	tasklist = EnforceBlacklist(tasklist)
 	// Choose a random task
 	rand.Seed(time.Now().UnixNano())
 	task := tasklist[rand.Intn(len(tasklist))]
@@ -100,11 +92,9 @@ func KillRandomTask(client marathon.Marathon, blacklist []string) string {
 
 /*  Remove blacklisted applications or tasks from blacklisted applications from a list of potential targets 
  *  	targets: 	array of application or task ids for potential targets
- *  	blacklist: 	array of applications to not kill
  */
-func EnforceBlacklist(targets, blacklist []string) []string {
+func EnforceBlacklist(targets []string) []string {
 	for i, target := range(targets) {
-		glog.Info(target)
 		for _, blacklisted := range(blacklist) {
 			if (strings.HasPrefix(target, "/")) && (strings.TrimPrefix(target, "/")==blacklisted) {
 				targets = append(targets[:i], targets[i+1:]...)
