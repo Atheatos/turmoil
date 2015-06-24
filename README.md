@@ -17,9 +17,14 @@ For example: every two hours, there is a 75% chance that half of all running tas
 fraction = 0.5
 fractionFrequency = 2
 fractionProbability = 0.75
-```  
-  
- 
+```   
+   
+The start and stop times can also be set:
+```
+start = "10:00"
+stop = "16:00"
+```   
+   
 Run Turmoil with the configuration file:
 ```
 ./turmoil -config=params.ini
