@@ -45,10 +45,10 @@ func KillTaskFraction(fraction float64) []string {
 	// Random permutate the array and kill the first `numTargets` tasks
 	rand.Seed(time.Now().UnixNano())
 	numTasks := float64(len(tasklist))
-	numTargets := int(numTasks*fraction)
+	numTargets := int(numTasks * fraction)
 	indices := rand.Perm(int(numTasks))[0:numTargets]
 	targets := make([]string, numTargets)
-	for i, randi := range(indices) {
+	for i, randi := range indices {
 		targets[i] = tasklist[randi]
 	}
 	// Execute
@@ -90,15 +90,15 @@ func KillRandomTask() string {
 	return task
 }
 
-/*  Remove blacklisted applications or tasks from blacklisted applications from a list of potential targets 
+/*  Remove blacklisted applications or tasks from blacklisted applications from a list of potential targets
  *  	targets: 	array of application or task ids for potential targets
  */
 func EnforceBlacklist(targets []string) []string {
-	for i, target := range(targets) {
-		for _, blacklisted := range(blacklist) {
-			if (strings.HasPrefix(target, "/")) && (strings.TrimPrefix(target, "/")==blacklisted) {
+	for i, target := range targets {
+		for _, blacklisted := range blacklist {
+			if (strings.HasPrefix(target, "/")) && (strings.TrimPrefix(target, "/") == blacklisted) {
 				targets = append(targets[:i], targets[i+1:]...)
-			} else if (!strings.HasPrefix(target, "/")) && (target[0:strings.LastIndex(target, ".")]==blacklisted) {
+			} else if (!strings.HasPrefix(target, "/")) && (target[0:strings.LastIndex(target, ".")] == blacklisted) {
 				targets = append(targets[:i], targets[i+1:]...)
 			}
 		}
@@ -109,9 +109,9 @@ func EnforceBlacklist(targets []string) []string {
 /*  Extract a string array of task IDs from an array of Marathon Task structs
  *  	tasks: 	array of Marathon Task structs
  */
-func ExtractTaskIDs (tasks []marathon.Task) []string {
+func ExtractTaskIDs(tasks []marathon.Task) []string {
 	stringTasks := make([]string, len(tasks))
-	for i, task := range(tasks) {
+	for i, task := range tasks {
 		stringTasks[i] = task.ID
 	}
 	return stringTasks

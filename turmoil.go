@@ -25,8 +25,8 @@ SOFTWARE.
 package main
 
 import (
-	"fmt"
 	"flag"
+	"fmt"
 	marathon "github.com/gambol99/go-marathon"
 	"github.com/golang/glog"
 	"github.com/vharitonsky/iniflags"
@@ -37,22 +37,22 @@ import (
 var (
 	// Client config
 	blacklistString = flag.String("blacklist", "turmoil", "Application names to remove from target lists (separate by comma)")
-	marathonURL = flag.String("hostURL", "http://127.0.0.1:8080", "the url for the marathon endpoint")
-	runStart = flag.String("start", "10:00", "The start time for Turmoil")
-	runStop = flag.String("stop", "16:00", "The stop time for Turmoil")
+	marathonURL     = flag.String("hostURL", "http://127.0.0.1:8080", "the url for the marathon endpoint")
+	runStart        = flag.String("start", "10:00", "The start time for Turmoil")
+	runStop         = flag.String("stop", "16:00", "The stop time for Turmoil")
 	// Kill one task
-	taskFrequency = flag.Float64("taskFrequency", 0.1, "Number of hours between attempts to kill a single random task")
+	taskFrequency   = flag.Float64("taskFrequency", 0.1, "Number of hours between attempts to kill a single random task")
 	taskProbability = flag.Float64("taskProbability", 0.5, "Probability that a single task kill attempt succeeds")
 	// Kill one application
-	appFrequency = flag.Float64("appFrequency", 0.5, "Number of hours between attempts to kill a single random application")
+	appFrequency   = flag.Float64("appFrequency", 0.5, "Number of hours between attempts to kill a single random application")
 	appProbability = flag.Float64("appProbability", 0.2, "Probability that a single task kill attempt succeeds")
 	// Kill a fraction of tasks
-	killFraction = flag.Float64("fraction", 0.25, " of tasks to be killed (e.g. 0.25 kills 25 percent of all tasks)")
-	fractionFrequency = flag.Float64("fractionFrequency", 0.5, "Number of hours between attempts to kill a fraction of tasks at random")
+	killFraction        = flag.Float64("fraction", 0.25, " of tasks to be killed (e.g. 0.25 kills 25 percent of all tasks)")
+	fractionFrequency   = flag.Float64("fractionFrequency", 0.5, "Number of hours between attempts to kill a fraction of tasks at random")
 	fractionProbability = flag.Float64("fractionProbability", 0.2, "Probability that a single task kill attempt succeeds")
 
 	blacklist []string
-	client marathon.Marathon
+	client    marathon.Marathon
 )
 
 func main() {
