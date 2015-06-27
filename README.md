@@ -30,6 +30,23 @@ Run Turmoil with the configuration file:
 ./turmoil -config=params.ini
 ```
 * * *
+### Docker
+For the container to build and run successfully, Turmoil must be compiled with statically-linked binaries
+```
+$ CGO_ENABLED=0 go build -a -installsuffix cgo
+$ ldd turmoil
+	not a dynamic executable
+```
+Build the container image using ```docker build``` or retrieve with ```docker pull atheatos/turmoil```  
+
+Use ```-v``` to mount the parameter and local time files at runtime
+```
+$ docker run --rm -it \
+> -v /etc/localtime:/etc/localtime:ro \
+> -v /path/to/params.ini:/params.ini:ro \
+> atheatos/turmoil:dev
+```  
+  
 ### Dependencies
 + [iniflags](https://github.com/vharitonsky/iniflags) 
 
