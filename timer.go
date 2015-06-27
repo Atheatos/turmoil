@@ -157,7 +157,8 @@ func TaskTimer(quit chan int) {
 			rand.Seed(time.Now().UnixNano())
 			glog.Info("Attempting to kill a random task")
 			if rand.Float64() <= *taskProbability {
-				glog.Info("Killed task: ", KillRandomTask())
+				victim := KillRandomTask()
+				glog.Info("Killed task: ", victim)
 			} else {
 				glog.Info("Did not kill a task")
 			}
@@ -182,7 +183,8 @@ func AppTimer(quit chan int) {
 			rand.Seed(time.Now().UnixNano())
 			glog.Info("Attempting to kill a random application")
 			if rand.Float64() <= *appProbability {
-				glog.Info("Killed application: ", KillRandomApp())
+				victim := KillRandomApp()
+				glog.Info("Killed application: ", victim)
 			} else {
 				glog.Info("Did not kill an application")
 			}

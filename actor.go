@@ -25,7 +25,6 @@ SOFTWARE.
 package main
 
 import (
-	marathon "github.com/gambol99/go-marathon"
 	"github.com/golang/glog"
 	"math/rand"
 	"strings"
@@ -36,20 +35,18 @@ import (
  *  	fraction: 	fraction of the total tasks to be killed
  */
 func KillTaskFraction(fraction float64) []string {
-	// Get tasks from marathon
-	tasks, err := client.AllTasks()
+	// Get tasks from marathon and enforce blacklist
+	tasklist, err := client.ListTasks()
 	Assert(err)
-	// Prevent suicide
-	tasklist := ExtractTaskIDs(tasks.Tasks)
-	tasklist = EnforceBlacklist(tasklist)
-	// Random permutate the array and kill the first `numTargets` tasks
+	tasks := EnforceBlacklist(tasklist)
+	// Randomly permute the array and kill the first `numTargets` tasks
 	rand.Seed(time.Now().UnixNano())
-	numTasks := float64(len(tasklist))
+	numTasks := float64(len(tasks))
 	numTargets := int(numTasks * fraction)
 	indices := rand.Perm(int(numTasks))[0:numTargets]
 	targets := make([]string, numTargets)
 	for i, randi := range indices {
-		targets[i] = tasklist[randi]
+		targets[i] = tasks[randi]
 	}
 	// Execute
 	Assert(client.KillTasks(targets, false))
@@ -67,26 +64,25 @@ func KillRandomApp() string {
 	rand.Seed(time.Now().UnixNano())
 	app := applist[rand.Intn(len(applist))]
 	// Execute
-	_, delerr := client.KillApplicationTasks(app, "", false)
-	Assert(delerr)
+	_, err = client.KillApplicationTasks(app, "", false)
+	Assert(err)
 	return app
 }
 
 /*  Kill one random task */
 func KillRandomTask() string {
 	// Get all of the running tasks from marathon
-	tasks, err := client.AllTasks()
+	tasks, err := client.ListTasks()
 	Assert(err)
 	// Remove turmoil from the list of targets
-	tasklist := ExtractTaskIDs(tasks.Tasks)
-	tasklist = EnforceBlacklist(tasklist)
+	tasks = EnforceBlacklist(tasks)
 	// Choose a random task
 	rand.Seed(time.Now().UnixNano())
-	task := tasklist[rand.Intn(len(tasklist))]
-	app := task[0:strings.LastIndex(task, ".")] // extract the app name from the task ID
+	glog.Info(tasks)
+	task := tasks[rand.Intn(len(tasks))]
 	// Tell Marathon to delete chosen task
-	_, delerr := client.KillTask(app, task, false)
-	Assert(delerr)
+	_, err = client.KillTask(task, false)
+	Assert(err)
 	return task
 }
 
@@ -104,17 +100,6 @@ func EnforceBlacklist(targets []string) []string {
 		}
 	}
 	return targets
-}
-
-/*  Extract a string array of task IDs from an array of Marathon Task structs
- *  	tasks: 	array of Marathon Task structs
- */
-func ExtractTaskIDs(tasks []marathon.Task) []string {
-	stringTasks := make([]string, len(tasks))
-	for i, task := range tasks {
-		stringTasks[i] = task.ID
-	}
-	return stringTasks
 }
 
 // Assert an error, if any
