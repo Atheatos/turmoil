@@ -30,7 +30,6 @@ import (
 	marathon "github.com/gambol99/go-marathon"
 	"github.com/golang/glog"
 	"github.com/vharitonsky/iniflags"
-	"os"
 	"strings"
 )
 
@@ -50,6 +49,8 @@ var (
 	killFraction        = flag.Float64("fraction", 0.25, " of tasks to be killed (e.g. 0.25 kills 25 percent of all tasks)")
 	fractionFrequency   = flag.Float64("fractionFrequency", 0.5, "Number of hours between attempts to kill a fraction of tasks at random")
 	fractionProbability = flag.Float64("fractionProbability", 0.2, "Probability that a single task kill attempt succeeds")
+	hostFrequency       = flag.Float64("hostFrequency", 2, "Number of hours between attempts to kill all tasks on a random host")
+	hostProbability     = flag.Float64("hostProbability", 0.25, "Probability that a host tasks kill attempt succeeds")
 
 	blacklist []string
 	client    marathon.Marathon
@@ -61,7 +62,6 @@ func main() {
 	blacklist = strings.Split(*blacklistString, ",")
 	config := marathon.NewDefaultConfig()
 	config.URL = *marathonURL
-	config.LogOutput = os.Stdout
 	client, _ = marathon.NewClient(config)
 
 	// Log
@@ -70,10 +70,8 @@ func main() {
 	glog.Info(fmt.Sprintf("All tasks * %.2f: %.2f probability every %.2f hour(s)", *killFraction, *fractionProbability, *fractionFrequency))
 
 	// Timing
-	taskQuit := make(chan int)
-	appQuit := make(chan int)
-	fracQuit := make(chan int)
+	quitChans := []chan int{make(chan int), make(chan int), make(chan int), make(chan int)}
 	start := ParseTime(*runStart)
 	stop := ParseTime(*runStop)
-	RunScheduler(start, stop, taskQuit, appQuit, fracQuit)
+	RunScheduler(start, stop, quitChans)
 }

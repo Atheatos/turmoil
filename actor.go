@@ -31,6 +31,23 @@ import (
 	"time"
 )
 
+/* Kills all tasks associated with a random hostname */
+func KillHostTasks() string {
+	// Select target host
+	hosts := ListSlaves()
+	rand.Seed(time.Now().UnixNano())
+	targethost := hosts[rand.Intn(len(hosts))]
+	// Get a list of applications
+	applications, err := client.ListApplications()
+	Assert(err)
+	applist := EnforceBlacklist(applications)
+	// Delete all tasks on the selected hostname
+	for _, app := range applist {
+		_, err = client.KillApplicationTasks(app, targethost, false)
+	}
+	return targethost
+}
+
 /*  Kills a fraction of existing tasks
  *  	fraction: 	fraction of the total tasks to be killed
  */
@@ -78,7 +95,6 @@ func KillRandomTask() string {
 	tasks = EnforceBlacklist(tasks)
 	// Choose a random task
 	rand.Seed(time.Now().UnixNano())
-	glog.Info(tasks)
 	task := tasks[rand.Intn(len(tasks))]
 	// Tell Marathon to delete chosen task
 	_, err = client.KillTask(task, false)

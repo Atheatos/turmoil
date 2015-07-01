@@ -25,6 +25,7 @@ SOFTWARE.
 package main
 
 import (
+	"fmt"
 	"github.com/golang/glog"
 	"math/rand"
 	"strconv"
@@ -39,26 +40,24 @@ const (
 /* Starts and stops timers based on the given time constraints.
  *  start:  when to start running timers
  *  stop:   when to stop running timers
- *  task:   quit channel for TaskTimer
- *  app:  quit channel for AppTimer
- *  frac:   quit channel for FractionTimer
+ *  quit:   quit channels for timers
  */
-func RunScheduler(start, stop time.Duration, task, app, frac chan int) {
-	StabilizeTiming(start, stop, task, app, frac)
+func RunScheduler(start, stop time.Duration, quit []chan int) {
+	StabilizeTiming(start, stop, quit)
 	if start > stop {
 		// overnight
 		for {
-			StopTimers(task, app, frac)
+			StopTimers(quit)
 			time.Sleep(start - CurrentTime())
-			StartTimers(task, app, frac)
+			StartTimers(quit)
 			time.Sleep(H24 - CurrentTime() + stop)
 		}
 	} else {
 		// day
 		for {
-			StopTimers(task, app, frac)
+			StopTimers(quit)
 			time.Sleep(H24 - CurrentTime() + start)
-			StartTimers(task, app, frac)
+			StartTimers(quit)
 			time.Sleep(stop - CurrentTime())
 		}
 	}
@@ -67,25 +66,23 @@ func RunScheduler(start, stop time.Duration, task, app, frac chan int) {
 /* Aligns timing so that scheduling can be done in a single loop.
  * 	start: 	when to start running timers
  * 	stop: 	when to stop running timers
- * 	task: 	quit channel for TaskTimer
- * 	app: 	quit channel for AppTimer
- * 	frac: 	quit channel for FractionTimer
+ * 	quit: 	quit channels for timers
  */
-func StabilizeTiming(start, stop time.Duration, task, app, frac chan int) {
+func StabilizeTiming(start, stop time.Duration, quit []chan int) {
 	now := CurrentTime()
 	if start > stop {
 		glog.Info("Run overnight between ", *runStart, " and ", *runStop)
 		switch {
 		case (now > start):
-			StartTimers(task, app, frac)
+			StartTimers(quit)
 			time.Sleep(H24 + stop - CurrentTime())
 		case (now < stop):
-			StartTimers(task, app, frac)
+			StartTimers(quit)
 			time.Sleep(stop - CurrentTime())
 		default:
 			glog.Info("Waiting until ", *runStart, " to start")
 			time.Sleep(start - CurrentTime())
-			StartTimers(task, app, frac)
+			StartTimers(quit)
 			time.Sleep(H24 - CurrentTime() + stop)
 		}
 	} else {
@@ -95,15 +92,15 @@ func StabilizeTiming(start, stop time.Duration, task, app, frac chan int) {
 		case (now < start):
 			glog.Info("Waiting until ", *runStart, " to start")
 			time.Sleep(start - CurrentTime())
-			StartTimers(task, app, frac)
+			StartTimers(quit)
 			time.Sleep(stop - CurrentTime())
 		case (now > stop):
 			glog.Info("Waiting until ", *runStart, " to start")
 			time.Sleep(H24 - CurrentTime() + start)
-			StartTimers(task, app, frac)
+			StartTimers(quit)
 			time.Sleep(stop - CurrentTime())
 		default:
-			StartTimers(task, app, frac)
+			StartTimers(quit)
 			time.Sleep(stop - CurrentTime())
 		}
 	}
@@ -114,19 +111,23 @@ func StabilizeTiming(start, stop time.Duration, task, app, frac chan int) {
  *  app:  quit channel for AppTimer
  *  frac:   quit channel for FractionTimer
  */
-func StartTimers(task, app, frac chan int) {
+func StartTimers(quit []chan int) {
 	glog.Info("Starting timers; Running until ", *runStop)
 	if *taskFrequency*3600.0 >= 1 {
-		go TaskTimer(task)
+		go TaskTimer(quit[0])
 		glog.Info("  TaskTimer started")
 	}
 	if *appFrequency*3600.0 >= 1 {
-		go AppTimer(app)
+		go AppTimer(quit[1])
 		glog.Info("  AppTimer started")
 	}
 	if *fractionFrequency*3600.0 >= 1 {
-		go FractionTimer(frac)
+		go FractionTimer(quit[2])
 		glog.Info("  FractionTimer started")
+	}
+	if *hostFrequency*3600.0 >= 1 {
+		go HostTimer(quit[3])
+		glog.Info("  HostTimer started")
 	}
 }
 
@@ -135,10 +136,10 @@ func StartTimers(task, app, frac chan int) {
  *  app:  quit channel for AppTimer
  *  frac:   quit channel for FractionTimer
  */
-func StopTimers(task, app, frac chan int) {
-	task <- 1
-	app <- 1
-	frac <- 1
+func StopTimers(quit []chan int) {
+	for _, q := range quit {
+		q <- 1
+	}
 	glog.Info("All timers stopped; Restart at ", *runStart)
 }
 
@@ -210,8 +211,34 @@ func FractionTimer(quit chan int) {
 			glog.Info("Attempting to kill a fraction of running tasks")
 			if rand.Float64() <= *fractionProbability {
 				victims := KillTaskFraction(*killFraction)
-				glog.Info("Killed %d tasks: ", len(victims))
-				glog.V(1).Info("%#v", victims)
+				glog.Info(fmt.Sprintf("Killed %d tasks", len(victims)))
+				glog.V(1).Info(fmt.Sprintf("%#v", victims))
+			} else {
+				glog.Info("Did not kill any tasks")
+			}
+		case <-quit:
+			ticker.Stop()
+			close(stop)
+			return
+		}
+	}
+}
+
+/* Time/schedule host task deletion
+ *  quit: channel for telling the timer to stop
+ */
+func HostTimer(quit chan int) {
+	glog.Info("HostTimer is running")
+	stop := make(chan int)
+	ticker := time.NewTicker(time.Duration(*hostFrequency*3600.0) * time.Second)
+	for {
+		select {
+		case <-ticker.C:
+			rand.Seed(time.Now().UnixNano())
+			glog.Info("Attempting to kill all tasks on a random host")
+			if rand.Float64() <= *hostProbability {
+				victim := KillHostTasks()
+				glog.Info(fmt.Sprintf("Killed all tasks running on %s", victim))
 			} else {
 				glog.Info("Did not kill any tasks")
 			}
