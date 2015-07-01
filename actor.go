@@ -37,14 +37,17 @@ func KillHostTasks() string {
 	hosts := ListSlaves()
 	rand.Seed(time.Now().UnixNano())
 	targethost := hosts[rand.Intn(len(hosts))]
-	// Get a list of applications
-	applications, err := client.ListApplications()
+	// Get a list of tasks associated with that host
+	tasks, err := client.AllTasks()
 	Assert(err)
-	applist := EnforceBlacklist(applications)
-	// Delete all tasks on the selected hostname
-	for _, app := range applist {
-		_, err = client.KillApplicationTasks(app, targethost, false)
+	targets := make([]string, 0)
+	for _, task := range tasks.Tasks {
+		if task.Host == targethost {
+			targets = append(targets, task.ID)
+		}
 	}
+	// Delete all tasks on the selected hostname
+	Assert(client.KillTasks(targets, false))
 	return targethost
 }
 

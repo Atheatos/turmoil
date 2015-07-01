@@ -27,24 +27,22 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 func ListSlaves() []string {
 	// Prepare request
 	slavelist := make([]string, 0)
-	slaves := new(Slaves)
 	leader, err := client.Leader()
 	Assert(err)
 	// Make request
-	resp, err := http.Get(fmt.Sprintf("http://%s/slaves", leader))
+	resp, err := http.Get(fmt.Sprintf("http://%s:5050/slaves", strings.Split(leader, ":")[0]))
 	Assert(err)
 	defer resp.Body.Close()
 	// Process response
-	body, err := ioutil.ReadAll(resp.Body)
-	Assert(err)
-	Assert(json.Unmarshal(body, &slaves))
+	var slaves Slaves
+	Assert(json.NewDecoder(resp.Body).Decode(&slaves))
 	for _, slave := range slaves.Slaves {
 		slavelist = append(slavelist, slave.Hostname)
 	}
