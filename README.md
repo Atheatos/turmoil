@@ -6,7 +6,8 @@ Turmoil can currently perform three functions:
   1. Kill a single task  
   2. Kill a single application  
   3. Kill a given fraction of currently running tasks  
-
+  4. Kill all tasks on a single host  
+  
 Targets are selected pseudo-randomly and are killed via calls to Marathon's REST API.
 * * *
 ### Configuration
@@ -48,8 +49,6 @@ $ docker run --rm -it \
 ```  
   
 ### Dependencies
-+ [iniflags](https://github.com/vharitonsky/iniflags) 
-
++ [iniflags](https://github.com/vharitonsky/iniflags)
 + [glog](https://github.com/golang/glog)
-
 + [go-marathon](http://github.com/gambol99/go-marathon)
