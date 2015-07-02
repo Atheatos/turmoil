@@ -115,19 +115,19 @@ func StartTimers(quit []chan int) {
 	glog.Info("Starting timers; Running until ", *runStop)
 	if *taskFrequency*3600.0 >= 1 {
 		go TaskTimer(quit[0])
-		glog.Info("  TaskTimer started")
+		glog.Info(" | TaskTimer started")
 	}
 	if *appFrequency*3600.0 >= 1 {
 		go AppTimer(quit[1])
-		glog.Info("  AppTimer started")
+		glog.Info(" | AppTimer started")
 	}
 	if *fractionFrequency*3600.0 >= 1 {
 		go FractionTimer(quit[2])
-		glog.Info("  FractionTimer started")
+		glog.Info(" | FractionTimer started")
 	}
 	if *hostFrequency*3600.0 >= 1 {
 		go HostTimer(quit[3])
-		glog.Info("  HostTimer started")
+		glog.Info(" | HostTimer started")
 	}
 }
 

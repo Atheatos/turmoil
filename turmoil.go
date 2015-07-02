@@ -65,9 +65,11 @@ func main() {
 	client, _ = marathon.NewClient(config)
 
 	// Log
-	glog.Info(fmt.Sprintf("Single task: %.2f probability every %.2f hour(s)", *taskProbability, *taskFrequency))
-	glog.Info(fmt.Sprintf("Single application: %.2f probability every %.2f hour(s)", *appProbability, *appFrequency))
-	glog.Info(fmt.Sprintf("All tasks * %.2f: %.2f probability every %.2f hour(s)", *killFraction, *fractionProbability, *fractionFrequency))
+	glog.Info("Kill settings:")
+	glog.Info(fmt.Sprintf(" | Single task: %.2f probability every %.2f hour(s)", *taskProbability, *taskFrequency))
+	glog.Info(fmt.Sprintf(" | Single application: %.2f probability every %.2f hour(s)", *appProbability, *appFrequency))
+	glog.Info(fmt.Sprintf(" | Task Fraction (%.2f): %.2f probability every %.2f hour(s)", *killFraction, *fractionProbability, *fractionFrequency))
+	glog.Info(fmt.Sprintf(" | Single host: %.2f probability every %.2f hour(s)", *hostProbability, *hostFrequency))
 
 	// Timing
 	quitChans := []chan int{make(chan int), make(chan int), make(chan int), make(chan int)}
