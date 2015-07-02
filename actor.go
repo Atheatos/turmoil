@@ -25,7 +25,6 @@ SOFTWARE.
 package main
 
 import (
-	"github.com/golang/glog"
 	"math/rand"
 	"strings"
 	"time"
@@ -119,11 +118,4 @@ func EnforceBlacklist(targets []string) []string {
 		}
 	}
 	return targets
-}
-
-// Assert an error, if any
-func Assert(err error) {
-	if err != nil {
-		glog.Fatalf("Failed, error: %s", err)
-	}
 }

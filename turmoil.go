@@ -75,3 +75,10 @@ func main() {
 	stop := ParseTime(*runStop)
 	RunScheduler(start, stop, quitChans)
 }
+
+// Assert an error, if any
+func Assert(err error) {
+	if err != nil {
+		glog.Fatalf("Failed, error: %s", err)
+	}
+}

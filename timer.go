@@ -156,12 +156,12 @@ func TaskTimer(quit chan int) {
 		select {
 		case <-ticker.C:
 			rand.Seed(time.Now().UnixNano())
-			glog.Info("Attempting to kill a random task")
+			glog.Info("TaskTimer -- Attempting to kill a random task")
 			if rand.Float64() <= *taskProbability {
 				victim := KillRandomTask()
-				glog.Info("Killed task: ", victim)
+				glog.Info("TaskTimer -- Killed task: ", victim)
 			} else {
-				glog.Info("Did not kill a task")
+				glog.Info("TaskTimer -- Did not kill a task")
 			}
 		case <-quit:
 			ticker.Stop()
@@ -182,12 +182,12 @@ func AppTimer(quit chan int) {
 		select {
 		case <-ticker.C:
 			rand.Seed(time.Now().UnixNano())
-			glog.Info("Attempting to kill a random application")
+			glog.Info("AppTimer -- Attempting to kill a random application")
 			if rand.Float64() <= *appProbability {
 				victim := KillRandomApp()
-				glog.Info("Killed application: ", victim)
+				glog.Info("AppTimer -- Killed application: ", victim)
 			} else {
-				glog.Info("Did not kill an application")
+				glog.Info("AppTimer -- Did not kill an application")
 			}
 		case <-quit:
 			ticker.Stop()
@@ -208,13 +208,13 @@ func FractionTimer(quit chan int) {
 		select {
 		case <-ticker.C:
 			rand.Seed(time.Now().UnixNano())
-			glog.Info("Attempting to kill a fraction of running tasks")
+			glog.Info("FractionTimer -- Attempting to kill a fraction of running tasks")
 			if rand.Float64() <= *fractionProbability {
 				victims := KillTaskFraction(*killFraction)
-				glog.Info(fmt.Sprintf("Killed %d tasks", len(victims)))
+				glog.Info(fmt.Sprintf("FractionTimer -- Killed %d tasks", len(victims)))
 				glog.V(1).Info(fmt.Sprintf("%#v", victims))
 			} else {
-				glog.Info("Did not kill any tasks")
+				glog.Info("FractionTimer -- Did not kill any tasks")
 			}
 		case <-quit:
 			ticker.Stop()
@@ -235,12 +235,12 @@ func HostTimer(quit chan int) {
 		select {
 		case <-ticker.C:
 			rand.Seed(time.Now().UnixNano())
-			glog.Info("Attempting to kill all tasks on a random host")
+			glog.Info("HostTimer -- Attempting to kill all tasks on a random host")
 			if rand.Float64() <= *hostProbability {
 				victim := KillHostTasks()
-				glog.Info(fmt.Sprintf("Killed all tasks running on %s", victim))
+				glog.Info(fmt.Sprintf("HostTimer -- Killed all tasks running on %s", victim))
 			} else {
-				glog.Info("Did not kill any tasks")
+				glog.Info("HostTimer -- Did not kill any tasks")
 			}
 		case <-quit:
 			ticker.Stop()
