@@ -34,10 +34,9 @@ import (
 func ListSlaves() []string {
 	// Prepare request
 	slavelist := make([]string, 0)
-	leader, err := client.Leader()
-	Assert(err)
+	leader := MesosLeader()
 	// Make request
-	resp, err := http.Get(fmt.Sprintf("http://%s:5050/slaves", strings.Split(leader, ":")[0]))
+	resp, err := http.Get(fmt.Sprintf("http://%s/slaves", leader))
 	Assert(err)
 	defer resp.Body.Close()
 	// Process response
@@ -47,6 +46,18 @@ func ListSlaves() []string {
 		slavelist = append(slavelist, slave.Hostname)
 	}
 	return slavelist
+}
+
+func MesosLeader() string {
+	leader, err := client.Leader()
+	Assert(err)
+	stateURL := fmt.Sprintf("http://%s:5050/master/state.json", strings.Split(leader, ":")[0])
+	resp, err := http.Get(stateURL)
+	Assert(err)
+	defer resp.Body.Close()
+	var state MesosState
+	Assert(json.NewDecoder(resp.Body).Decode(&state))
+	return strings.Split(state.Leader, "master@")[1]
 }
 
 type Slaves struct {
@@ -71,3 +82,7 @@ type Resource struct {
 }
 
 type Attribute struct{}
+
+type MesosState struct {
+	Leader string `json:"leader",omitempty`
+}

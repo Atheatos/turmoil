@@ -2,7 +2,7 @@ Turmoil
 =======
 Turmoil is a [Chaos Monkey](https://github.com/Netflix/SimianArmy/wiki/Chaos-Monkey)-like tool for testing the recovery ability of applications running on [Marathon](https://mesosphere.github.io/marathon/).
 
-Turmoil can currently perform three functions:  
+Turmoil can currently perform four functions:  
   1. Kill a single task  
   2. Kill a single application  
   3. Kill a given fraction of currently running tasks  
@@ -32,7 +32,7 @@ Run Turmoil with the configuration file:
 ```
 * * *
 ### Docker
-For the container to build and run successfully, Turmoil must be compiled with statically-linked binaries
+For the container to run successfully, Turmoil must be compiled as a statically-linked binary
 ```
 $ CGO_ENABLED=0 go build -a -installsuffix cgo
 $ ldd turmoil
