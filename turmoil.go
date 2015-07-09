@@ -61,9 +61,9 @@ func main() {
 	// Parse config and initialize the client (Marathon interface)
 	if _, err := os.Stat("/mnt/mesos/sandbox/params.ini"); err == nil {
 		iniflags.SetConfigFile("/mnt/mesos/sandbox/params.ini")
-		glog.Info("Using custom configuration")
+		fmt.Println("Using custom configuration")
 	} else {
-		glog.Info("Using default configuration")
+		fmt.Println("Using default configuration")
 	}
 	iniflags.Parse()
 	blacklist = strings.Split(*blacklistString, ",")
