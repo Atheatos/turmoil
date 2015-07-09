@@ -59,9 +59,9 @@ var (
 
 func main() {
 	// Parse config and initialize the client (Marathon interface)
-	if _, err := os.Stat("/mnt/mesos/sandbox/params.ini"); err != nil {
+	if _, err := os.Stat("/mnt/mesos/sandbox/params.ini"); err == nil {
 		iniflags.SetConfigFile("/mnt/mesos/sandbox/params.ini")
-		glog.Info("Successfully loaded custom configuration")
+		glog.Info("Using custom configuration")
 	} else {
 		glog.Info("Using default configuration")
 	}
