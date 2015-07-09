@@ -27,9 +27,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/atheatos/iniflags"
 	marathon "github.com/gambol99/go-marathon"
 	"github.com/golang/glog"
-	"github.com/vharitonsky/iniflags"
+	"os"
 	"strings"
 )
 
@@ -58,6 +59,12 @@ var (
 
 func main() {
 	// Parse config and initialize the client (Marathon interface)
+	if _, err := os.Stat("/mnt/mesos/sandbox/params.ini"); err != nil {
+		iniflags.SetConfigFile("/mnt/mesos/sandbox/params.ini")
+		glog.Info("Successfully loaded custom configuration")
+	} else {
+		glog.Info("Using default configuration")
+	}
 	iniflags.Parse()
 	blacklist = strings.Split(*blacklistString, ",")
 	config := marathon.NewDefaultConfig()
