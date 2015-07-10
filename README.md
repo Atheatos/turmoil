@@ -40,14 +40,39 @@ $ ldd turmoil
 ```
 Build the container image using ```docker build``` or retrieve with ```docker pull atheatos/turmoil```  
 
-Use ```-v``` to mount the parameter and local time files at runtime
+Use ```-v``` to mount the local time file. Turmoil will use ```params.ini``` from the root directory if it is not found in ```/mnt/mesos/sandbox```
 ```
 $ docker run --rm -it \
 > -v /etc/localtime:/etc/localtime:ro \
-> -v /path/to/params.ini:/params.ini:ro \
 > atheatos/turmoil:dev
 ```  
   
+Run the container on Marathon:
+```
+{
+	"container": {
+		"docker": {
+			"image": "atheatos/turmoil:dev"
+		},
+		"type": "DOCKER",
+		"volumes": [
+			{
+				"containerPath": "/etc/localtime",
+				"hostPath": "/etc/localtime",
+				"mode": "RO"
+			}
+		]
+	},
+	"cpus": 0.1,
+	"id": "turmoil",
+	"instances": 1,
+	"mem": 16,
+	"uris": [],
+	"disk": 4
+}
+```
+```curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" http://<marathon_url>:8080/v2/apps -d@turmoil.json```
+
 ### Dependencies
 + [iniflags](https://github.com/vharitonsky/iniflags)
 + [glog](https://github.com/golang/glog)
