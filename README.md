@@ -42,9 +42,9 @@ Build the container image using ```docker build``` or retrieve with ```docker pu
 
 Use ```-v``` to mount the local time file. Turmoil will use ```params.ini``` from the root directory if it is not found in ```/mnt/mesos/sandbox```
 ```
-$ docker run --rm -it \
-> -v /etc/localtime:/etc/localtime:ro \
-> atheatos/turmoil:dev
+docker run --rm -it \
+  -v /etc/localtime:/etc/localtime:ro \
+  atheatos/turmoil:dev
 ```  
   
 Run the container on Marathon:
@@ -70,9 +70,15 @@ Run the container on Marathon:
 	"uris": [],
 	"disk": 4
 }
+```  
 ```
-```curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" http://<marathon_url>:8080/v2/apps -d@turmoil.json```
-
+curl -X POST \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  http://<marathon_url>:8080/v2/apps \
+  -d@turmoil.json
+```  
+  
 ### Dependencies
 + [iniflags](https://github.com/vharitonsky/iniflags)
 + [glog](https://github.com/golang/glog)
