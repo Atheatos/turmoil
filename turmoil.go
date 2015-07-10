@@ -62,6 +62,8 @@ func main() {
 	var err error
 	if _, err = os.Stat("/mnt/mesos/sandbox/params.ini"); err == nil {
 		iniflags.SetConfigFile("/mnt/mesos/sandbox/params.ini")
+	} else {
+		iniflags.SetConfigFile("/params.ini")
 	}
 	iniflags.Parse()
 	glog.Warningln(err)

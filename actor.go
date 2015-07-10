@@ -45,6 +45,7 @@ func KillHostTasks() string {
 			targets = append(targets, task.ID)
 		}
 	}
+	targets = EnforceBlacklist(targets)
 	// Delete all tasks on the selected hostname
 	Assert(client.KillTasks(targets, false))
 	return targethost
