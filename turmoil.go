@@ -60,19 +60,26 @@ var (
 func main() {
 	// Parse config and initialize the client (Marathon interface)
 	var err error
-	if _, err = os.Stat("/mnt/mesos/sandbox/params.ini"); err == nil {
-		iniflags.SetConfigFile("/mnt/mesos/sandbox/params.ini")
+	var paramFile string
+	if paramFile = os.Getenv("TURMOIL_PARAM"); paramFile == "" {
+		paramFile = "params.ini"
+	}
+	fmt.Println(os.Getenv("TURMOIL_PARAM"))
+	paramPath := fmt.Sprint(os.Getenv("MESOS_SANDBOX"), "/", paramFile)
+	if _, err = os.Stat(paramPath); err == nil {
+		iniflags.SetConfigFile(paramPath)
 	} else {
 		iniflags.SetConfigFile("/params.ini")
 	}
 	iniflags.Parse()
-	glog.Warningln(err)
 	if err != nil {
+		glog.Warningln(err)
 		glog.Info("Using default configuration")
 	} else {
 		glog.Info("Using custom configuration")
 	}
 	blacklist = strings.Split(*blacklistString, ",")
+	glog.Info(blacklist)
 	config := marathon.NewDefaultConfig()
 	config.URL = *marathonURL
 	client, _ = marathon.NewClient(config)

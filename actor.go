@@ -112,11 +112,24 @@ func EnforceBlacklist(targets []string) []string {
 	for i, target := range targets {
 		for _, blacklisted := range blacklist {
 			if (strings.HasPrefix(target, "/")) && (strings.TrimPrefix(target, "/") == blacklisted) {
-				targets = append(targets[:i], targets[i+1:]...)
+				targets[i] = ""
 			} else if (!strings.HasPrefix(target, "/")) && (target[0:strings.LastIndex(target, ".")] == blacklisted) {
-				targets = append(targets[:i], targets[i+1:]...)
+				targets[i] = ""
 			}
 		}
 	}
-	return targets
+	return CleanEmpty(targets)
+}
+
+/*  Given a string array, return a new one without empty string ("") entries
+ *  	array: 	any string array
+ */
+func CleanEmpty(array []string) []string {
+	cleaned := make([]string, 0)
+	for _, e := range array {
+		if e != "" {
+			cleaned = append(cleaned, e)
+		}
+	}
+	return cleaned
 }

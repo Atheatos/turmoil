@@ -40,14 +40,32 @@ $ ldd turmoil
 ```
 Build the container image using ```docker build``` or retrieve with ```docker pull atheatos/turmoil```  
 
-Use ```-v``` to mount the local time file. Turmoil will use ```params.ini``` from the root directory if it is not found in ```/mnt/mesos/sandbox```
+Use ```-v``` to mount the local time file. Turmoil will use ```params.ini``` (or the file name set in the TURMOIL_PARAM variable inside the container with the ```-e``` flag) from the root directory if it is not found in the mesos sandbox (```MESOS_SANDBOX=/mnt/mesos/sandbox``` by default) within the container
 ```
 docker run --rm -it \
   -v /etc/localtime:/etc/localtime:ro \
   atheatos/turmoil:dev
 ```  
   
-Run the container on Marathon:
+A parameter file can be placed in the mesos sandbox by providing Marathon a URI from which to pull the file. For example, the file can be served by a local fileserver:
+```
+package main
+
+import "net/http"
+
+func main() {
+  http.Handle("/", http.FileServer(http.Dir(".")))
+  http.ListenAndServe(":8108",nil)
+}
+```  
+```
+$ ls
+custom_filename.ini  server.go
+$ go run server.go
+
+```  
+  
+Now, run the container on Marathon:
 ```
 {
 	"container": {
@@ -63,19 +81,24 @@ Run the container on Marathon:
 			}
 		]
 	},
+	"env": {
+		"MESOS_SANDBOX": "$MESOS_SANDBOX",
+		"TURMOIL_PARAM": "custom_filename.ini"
+	},
 	"cpus": 0.1,
 	"id": "turmoil",
 	"instances": 1,
 	"mem": 16,
-	"uris": [],
+	"uris": [ "http://127.0.0.1:8108/custom_filename.ini" ],
 	"disk": 4
 }
+
 ```  
 ```
 curl -X POST \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
-  http://<marathon_url>:8080/v2/apps \
+  http://127.0.0.1:8080/v2/apps \
   -d@turmoil.json
 ```  
   
