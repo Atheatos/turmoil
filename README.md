@@ -26,29 +26,36 @@ start = "10:00"
 stop = "16:00"
 ```   
    
-Run Turmoil with the configuration file:
+Run Turmoil with stderr logging:
 ```
-./turmoil -config=params.ini
+./turmoil -logtostderr
 ```
 * * *
-### Docker
-For the container to run successfully, Turmoil must be compiled as a statically-linked binary
+### Docker  
+  
+##### Build  
+For the container to run successfully, Turmoil must be compiled as a statically-linked binary.
 ```
 $ CGO_ENABLED=0 go build -a -installsuffix cgo
 $ ldd turmoil
 	not a dynamic executable
 ```
 Build the container image using ```docker build``` or retrieve with ```docker pull atheatos/turmoil```  
-
-Use ```-v``` to mount the local time file. Turmoil will use ```params.ini``` (or the file name set in the TURMOIL_PARAM variable inside the container with the ```-e``` flag) from the root directory if it is not found in the mesos sandbox (```MESOS_SANDBOX=/mnt/mesos/sandbox``` by default) within the container
+  
+##### Run  
+Use ```-v``` to mount the local time file
 ```
 docker run --rm -it \
   -v /etc/localtime:/etc/localtime:ro \
   atheatos/turmoil:dev
-```  
+``` 
+##### Environment Variables  
+Use the environment flag, ```-e, --env``` to set the variables within the container
++ ```TURMOIL_PARAM``` specifies the name of the parameter file; Turmoil will use ```params.ini``` if this is not set
++ ```MESOS_SANDBOX``` specifies the directory that Turmoil will first check for the parameter file (default: ```/mnt/mesos/sandbox```). If the file is not found, Turmoil uses ```/params.ini```
   
 A parameter file can be placed in the mesos sandbox by providing Marathon a URI from which to pull the file. For example, the file can be served by a local fileserver:
-```
+```go
 package main
 
 import "net/http"
@@ -64,9 +71,9 @@ custom_filename.ini  server.go
 $ go run server.go
 
 ```  
-  
+##### Marathon  
 Now, run the container on Marathon:
-```
+```json
 {
 	"container": {
 		"docker": {
