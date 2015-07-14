@@ -1,5 +1,5 @@
-Turmoil
-=======
+#Turmoil
+* * *
 Turmoil is a [Chaos Monkey](https://github.com/Netflix/SimianArmy/wiki/Chaos-Monkey)-like tool for testing the recovery ability of applications running on [Marathon](https://mesosphere.github.io/marathon/).
 
 Turmoil can currently perform four functions:  
@@ -24,12 +24,12 @@ The start and stop times can also be set:
 ```
 start = "10:00"
 stop = "16:00"
-```   
-   
-Run Turmoil with stderr logging:
+```  
+##### Logging  
+Log outputs can be enabled using ```-logtostderr```
 ```
 ./turmoil -logtostderr
-```
+```  
 * * *
 ### Docker  
   
@@ -46,15 +46,18 @@ Build the container image using ```docker build``` or retrieve with ```docker pu
 Use ```-v``` to mount the local time file
 ```
 docker run --rm -it \
-  -v /etc/localtime:/etc/localtime:ro \
-  atheatos/turmoil:dev
-``` 
-##### Environment Variables  
+    -v /etc/localtime:/etc/localtime:ro \
+    atheatos/turmoil:dev
+```  
+  
+##### Configure  
 Use the environment flag, ```-e, --env``` to set the variables within the container
 + ```TURMOIL_PARAM``` specifies the name of the parameter file; Turmoil will use ```params.ini``` if this is not set
 + ```MESOS_SANDBOX``` specifies the directory that Turmoil will first check for the parameter file (default: ```/mnt/mesos/sandbox```). If the file is not found, Turmoil uses ```/params.ini```
   
-A parameter file can be placed in the mesos sandbox by providing Marathon a URI from which to pull the file. For example, the file can be served by a local fileserver:
+A parameter file can be placed in the mesos sandbox by providing Marathon a URI from which to pull the file.  
+  
+For example, the file can be served by a local fileserver:  
 ```go
 package main
 
@@ -71,6 +74,7 @@ custom_filename.ini  server.go
 $ go run server.go
 
 ```  
+ 
 ##### Marathon  
 Now, run the container on Marathon:
 ```json
@@ -108,7 +112,8 @@ curl -X POST \
   http://127.0.0.1:8080/v2/apps \
   -d@turmoil.json
 ```  
-  
+Turmoil will log to standard error which can be viewed in the task's sandbox in Mesos.
+
 ### Dependencies
 + [iniflags](https://github.com/vharitonsky/iniflags)
 + [glog](https://github.com/golang/glog)
