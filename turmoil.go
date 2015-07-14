@@ -64,7 +64,6 @@ func main() {
 	if paramFile = os.Getenv("TURMOIL_PARAM"); paramFile == "" {
 		paramFile = "params.ini"
 	}
-	fmt.Println(os.Getenv("TURMOIL_PARAM"))
 	paramPath := fmt.Sprint(os.Getenv("MESOS_SANDBOX"), "/", paramFile)
 	if _, err = os.Stat(paramPath); err == nil {
 		iniflags.SetConfigFile(paramPath)
@@ -79,7 +78,6 @@ func main() {
 		glog.Info("Using custom configuration")
 	}
 	blacklist = strings.Split(*blacklistString, ",")
-	glog.Info(blacklist)
 	config := marathon.NewDefaultConfig()
 	config.URL = *marathonURL
 	client, _ = marathon.NewClient(config)
