@@ -37,6 +37,7 @@ import (
 var (
 	// Client config
 	blacklistString = flag.String("blacklist", "turmoil", "Application names to remove from target lists (separate by comma)")
+	whitelistString = flag.String("whitelist", "", "Application names to use in target lists (separate by comma)")
 	marathonURL     = flag.String("hostURL", "http://127.0.0.1:8080", "the url for the marathon endpoint")
 	runStart        = flag.String("start", "10:00", "The start time for Turmoil")
 	runStop         = flag.String("stop", "16:00", "The stop time for Turmoil")
@@ -53,8 +54,8 @@ var (
 	hostFrequency       = flag.Float64("hostFrequency", 2, "Number of hours between attempts to kill all tasks on a random host")
 	hostProbability     = flag.Float64("hostProbability", 0.25, "Probability that a host tasks kill attempt succeeds")
 
-	blacklist []string
-	client    marathon.Marathon
+	filterList []string
+	client     marathon.Marathon
 )
 
 func main() {
@@ -77,7 +78,6 @@ func main() {
 	} else {
 		glog.Info("Using custom configuration")
 	}
-	blacklist = strings.Split(*blacklistString, ",")
 	config := marathon.NewDefaultConfig()
 	config.URL = *marathonURL
 	client, _ = marathon.NewClient(config)
@@ -88,6 +88,13 @@ func main() {
 	glog.Info(fmt.Sprintf(" | Single application: %.2f probability every %.2f hour(s)", *appProbability, *appFrequency))
 	glog.Info(fmt.Sprintf(" | Task Fraction (%.2f): %.2f probability every %.2f hour(s)", *killFraction, *fractionProbability, *fractionFrequency))
 	glog.Info(fmt.Sprintf(" | Single host: %.2f probability every %.2f hour(s)", *hostProbability, *hostFrequency))
+	if *whitelistString == "" {
+		filterList = strings.Split(*blacklistString, ",")
+		glog.Info(" | Blacklist: ", filterList)
+	} else {
+		filterList = strings.Split(*whitelistString, ",")
+		glog.Info(" | Whitelist: ", filterList)
+	}
 
 	// Timing
 	quitChans := []chan int{make(chan int), make(chan int), make(chan int), make(chan int)}

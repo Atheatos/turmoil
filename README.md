@@ -11,7 +11,10 @@ Turmoil can currently perform four functions:
 Targets are selected pseudo-randomly and are killed via calls to Marathon's REST API.
 * * *
 ### Configuration
-Turmoil can be configured by modifying the fields listed in the ```params.ini``` file. This may be used to set the frequency and probability of kill attempts.
+Turmoil can be configured by modifying the fields listed in the ```params.ini``` file.  
+
+##### Timers  
+This may be used to set the frequency and probability of kill attempts.
 
 For example: every two hours, there is a 75% chance that half of all running tasks will be deleted
 ```
@@ -24,6 +27,19 @@ The start and stop times can also be set:
 ```
 start = "10:00"
 stop = "16:00"
+```  
+##### Black/White list  
+By default, Turmoil filters task deletion using a blacklist, but a whitelist may be defined to change its behavior.  
+  
+The following will kill tasks associated with every application except "turmoil" and "app1"  
+```
+blacklist = "turmoil,app1"
+whitelist = ""
+```  
+The following overrides the blacklist and will only kill tasks associated with "app2"  
+```
+blacklist = "turmoil,app1"
+whitelist = "app2"
 ```  
 ##### Logging  
 Log outputs can be enabled using ```-logtostderr```

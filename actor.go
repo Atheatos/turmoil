@@ -45,7 +45,7 @@ func KillHostTasks() string {
 			targets = append(targets, task.ID)
 		}
 	}
-	targets = EnforceBlacklist(targets)
+	targets = EnforceFilter(targets)
 	// Delete all tasks on the selected hostname
 	Assert(client.KillTasks(targets, false))
 	return targethost
@@ -58,7 +58,7 @@ func KillTaskFraction(fraction float64) []string {
 	// Get tasks from marathon and enforce blacklist
 	tasklist, err := client.ListTasks()
 	Assert(err)
-	tasks := EnforceBlacklist(tasklist)
+	tasks := EnforceFilter(tasklist)
 	// Randomly permute the array and kill the first `numTargets` tasks
 	rand.Seed(time.Now().UnixNano())
 	numTasks := float64(len(tasks))
@@ -79,7 +79,7 @@ func KillRandomApp() string {
 	applications, err := client.ListApplications()
 	Assert(err)
 	// Prevent suicide
-	applist := EnforceBlacklist(applications)
+	applist := EnforceFilter(applications)
 	// Kill random
 	rand.Seed(time.Now().UnixNano())
 	app := applist[rand.Intn(len(applist))]
@@ -95,7 +95,7 @@ func KillRandomTask() string {
 	tasks, err := client.ListTasks()
 	Assert(err)
 	// Remove turmoil from the list of targets
-	tasks = EnforceBlacklist(tasks)
+	tasks = EnforceFilter(tasks)
 	// Choose a random task
 	rand.Seed(time.Now().UnixNano())
 	task := tasks[rand.Intn(len(tasks))]
@@ -105,31 +105,23 @@ func KillRandomTask() string {
 	return task
 }
 
-/*  Remove blacklisted applications or tasks from blacklisted applications from a list of potential targets
+/*  Enforce whitelist or blacklist
  *  	targets: 	array of application or task ids for potential targets
  */
-func EnforceBlacklist(targets []string) []string {
-	for i, target := range targets {
-		for _, blacklisted := range blacklist {
-			if (strings.HasPrefix(target, "/")) && (strings.TrimPrefix(target, "/") == blacklisted) {
-				targets[i] = ""
-			} else if (!strings.HasPrefix(target, "/")) && (target[0:strings.LastIndex(target, ".")] == blacklisted) {
-				targets[i] = ""
+func EnforceFilter(targets []string) []string {
+	newTargets := make([]string, 0)
+	for _, target := range targets {
+		adversary := (*whitelistString == "")
+		for _, filtered := range filterList {
+			if !strings.HasPrefix(target, "/") && (target[0:strings.LastIndex(target, ".")] == filtered) {
+				adversary = !adversary
+			} else if strings.HasPrefix(target, "/") && (strings.TrimPrefix(target, "/") == filtered) {
+				adversary = !adversary
 			}
 		}
-	}
-	return CleanEmpty(targets)
-}
-
-/*  Given a string array, return a new one without empty string ("") entries
- *  	array: 	any string array
- */
-func CleanEmpty(array []string) []string {
-	cleaned := make([]string, 0)
-	for _, e := range array {
-		if e != "" {
-			cleaned = append(cleaned, e)
+		if adversary {
+			newTargets = append(newTargets, target)
 		}
 	}
-	return cleaned
+	return newTargets
 }
